@@ -9,4 +9,14 @@ class Invoice extends Model
 {
     /** @use HasFactory<\Database\Factories\InvoiceFactory> */
     use HasFactory;
+
+    protected $fillable = [
+        'customer_name',
+        'customer_contact',
+        'amount',
+        'due',
+        'paid',
+        'status',
+        'date',
+    ];
 }

@@ -5,20 +5,28 @@ namespace App\Http\Controllers;
 use App\Models\Invoice;
 use App\Http\Requests\StoreInvoiceRequest;
 use App\Http\Requests\UpdateInvoiceRequest;
+use Illuminate\Http\Request;
 
 class InvoiceController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $query = Invoice::query();
+        if($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if($request->filled(('from')) && $request->filled('to')) {
+            $query->whereBetween('created_at', [$request->from, $request->to]);
+        }
+
+        if ($request->filled('min') && $request->filled('max')) {
+            $query->whereBetween('amount', [$request->min, $request->max]);
+        }
+
+        return $query->get();
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(StoreInvoiceRequest $request)
     {
         //
@@ -32,9 +40,6 @@ class InvoiceController extends Controller
         //
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(UpdateInvoiceRequest $request, Invoice $invoice)
     {
         //

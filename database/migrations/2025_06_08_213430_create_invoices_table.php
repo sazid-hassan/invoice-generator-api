@@ -13,6 +13,15 @@ return new class extends Migration
     {
         Schema::create('invoices', function (Blueprint $table) {
             $table->id();
+            $table->string('customer_name');
+            $table->string('customer_contact');
+            $table->decimal('amount');
+            $table->decimal('due')->default(0);
+            $table->decimal('paid')->default(0);
+            $table->enum('status', ['pending', 'paid', 'overdue'])->default('pending');
+            $table->date('date')->nullable();
+            $table->string('note')->nullable();
+            $table->string('invoice_number')->unique();
             $table->timestamps();
         });
     }

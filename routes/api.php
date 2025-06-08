@@ -1,13 +1,11 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\InvoiceController;
 use Illuminate\Support\Facades\Route;
-
-// Route::get('/user', function (Request $request) {
-//     return $request->user();
-// })->middleware('auth:sanctum');
 
 
 Route::get('/', function (){
     return 'API';
 });
+
+Route::apiResource('invoices', InvoiceController::class);
