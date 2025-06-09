@@ -3,46 +3,70 @@
 namespace App\Http\Controllers;
 
 use App\Models\Invoice;
-use App\Http\Requests\StoreInvoiceRequest;
-use App\Http\Requests\UpdateInvoiceRequest;
 use Illuminate\Http\Request;
 
 class InvoiceController extends Controller
 {
-    public function index(Request $request)
-    {
-        $query = Invoice::query();
-        if($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
+public function index(Request $request)
+{
+    $invoices = Invoice::filter($request)
+        ->orderBy('created_at', 'desc') // optional: latest first
+        ->paginate(15);
 
-        if($request->filled(('from')) && $request->filled('to')) {
-            $query->whereBetween('created_at', [$request->from, $request->to]);
-        }
+    return response()->json($invoices);
+}
 
-        if ($request->filled('min') && $request->filled('max')) {
-            $query->whereBetween('amount', [$request->min, $request->max]);
-        }
 
-        return $query->get();
-    }
+public function store(Request $request)
+{
+    $request->validate([
+        'amount' => 'required|numeric',
+        'status' => 'required|string',
+        'customer_name' => 'required|string|max:255',
+        'customer_contact' => 'required|string|max:255',
+        'due' => 'required|numeric',
+        'paid' => 'required|numeric',
+        'date' => 'required|date',
+        'note' => 'nullable|string',
+    ]);
 
-    public function store(StoreInvoiceRequest $request)
-    {
-        //
-    }
+    $invoice = Invoice::create($request->all());
 
-    /**
-     * Display the specified resource.
-     */
+    return response()->json($invoice, 201);
+}
+
+
+
     public function show(Invoice $invoice)
     {
-        //
+        return response()->json($invoice);
     }
 
-    public function update(UpdateInvoiceRequest $request, Invoice $invoice)
+    public function update(Request $request, Invoice $invoice)
     {
-        //
+        $request->validate([
+            'amount' => 'sometimes|required|numeric',
+            'status' => 'sometimes|required|string',
+            'customer_name' => 'sometimes|required|string|max:255',
+            'customer_contact' => 'sometimes|required|string|max:255',
+            'due' => 'sometimes|required|numeric',
+            'paid' => 'sometimes|required|numeric',
+            'date' => 'sometimes|required|date',
+        ]);
+
+        $invoice->update($request->validate(
+            [
+                'amount' => 'sometimes|required|numeric',
+                'status' => 'sometimes|required|string',
+                'customer_name' => 'sometimes|required|string|max:255',
+                'customer_contact' => 'sometimes|required|string|max:255',
+                'due' => 'sometimes|required|numeric',
+                'paid' => 'sometimes|required|numeric',
+                'date' => 'sometimes|required|date',
+            ]
+        ));
+
+        return response()->json($invoice);
     }
 
     /**
@@ -50,6 +74,8 @@ class InvoiceController extends Controller
      */
     public function destroy(Invoice $invoice)
     {
-        //
+        $invoice->delete();
+
+        return response()->json(null, 204);
     }
 }
